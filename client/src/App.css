@@ -1,0 +1,96 @@
+@import 'bulma/css/bulma.css';
+
+.searchApp {
+  margin: auto
+}
+
+.form {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.input {
+  width: 40rem;
+}
+
+.submit-button {
+  height: 2.5rem;
+  width: 2.5rem;
+}
+
+.resultCard {
+  margin-bottom: 2rem;
+}
+
+.result {
+  width: 60rem;
+  margin: 0 auto;
+}
+
+.under-title {
+  display: flex;
+}
+
+.author {
+  margin-right: 0.3rem;
+}
+
+.dot-authors {
+  margin: 0 0.3rem;
+}
+
+.flex-item {
+  margin-right: 0.5rem;
+}
+
+.article-title {
+  font-weight: bold;
+}
+
+.abstract {
+  margin-top: 0.5rem;
+}
+
+.info {
+  display: flex;
+}
+
+.citations {
+  display: flex;
+  width: min-content;
+  align-items: center;
+}
+
+.quote-icon {
+  justify-content: center;
+}
+
+.pdf {
+  margin-left: 8px;
+}
+
+.citations, .pdf {
+  border: 1px solid #d9dadb;
+  border-radius: 10px;
+  color: #b85900;
+  padding: 0px 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.citations:hover, .pdf:hover {
+  border: 1px solid #2693ff;
+}
+
+.progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 100px;
+}
+
+.article-page {
+  width: 60rem;
+  margin: 0 auto;
+}
