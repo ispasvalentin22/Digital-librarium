@@ -4,13 +4,13 @@ import Card from "./Card";
 function CardList({ results }) {
   let data = [];
   if (results.data) {
-    data = results.data[0];
+    data = results.data;
   }
   // console.log(results);
   
   return (
-    <div className="result">
-      {data.map((item) => (
+    <div className="result"> 
+      {data.map((item) => ( // TODO NO RESULTS FOUND CASE
         <Card key={item.paperId} article={item} className="card" />
       ))}
     </div>

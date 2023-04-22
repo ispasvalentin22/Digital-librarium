@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit'
+import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 import { persistStore, persistReducer } from 'redux-persist'
 import articleReducer from './redux/article/article.reducer';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -16,7 +16,10 @@ const pReducer = persistReducer(persistConfig, rootReducer);
 
 const AppWrapper = () => {
   const store = configureStore({
-    reducer: pReducer
+    reducer: pReducer,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+      serializableCheck: false
+    })
   });
 
   let persistor = persistStore(store);

@@ -13,11 +13,10 @@ function Homepage() {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
-  const onSearch = async text => {
+  const onSearch = async (text, fieldsToSearch) => {
     setIsLoading(true);
-    const results = await axios.get(`http://localhost:4000/api/search/${text}`);
+    const results = await axios.get(`http://localhost:4000/api/search/${fieldsToSearch}/${text}`);
     const articles = results.data;
-    // console.log(articles);
 
     dispatch(articlesSave({ articles }));
 

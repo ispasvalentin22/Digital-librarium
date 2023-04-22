@@ -1,7 +1,7 @@
 import { ARTICLES_SAVE } from "./article.types";
 
 const INITIAL_STATE = {
-  articles: null
+  articles: []
 }
 
 const articleReducer = (state = INITIAL_STATE, action) => {
