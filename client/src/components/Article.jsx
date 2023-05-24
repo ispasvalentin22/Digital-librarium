@@ -13,9 +13,9 @@ function Article() {
     <div className="article-page">
       <h1 className="article-title">{article.title}</h1>
       <section className="under-title">
-        {article.authors?.map((author, idx) => (
+        {Array.isArray(article.authors) ? (article.authors?.map((author, idx) => (
           idx < 2 ? <h2 className="author">{author.name},</h2> : null
-        ))}
+        ))) : <h2 className="author">{article.authors.text}</h2>}
         {article.authors?.length - 2 > 0 ? <h2>+{article.authors?.length - 2} authors</h2> : null}
         <h2 className="dot-authors">•</h2>
         {article.fieldsOfStudy?.map(field => (

@@ -12,11 +12,12 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/search/:fieldsToSearch/:keywords', async (req, res) => {
-  const limit = 10;
+  const limit = 5;
   let papers = [];
 
   const { fieldsToSearch, keywords } = req.params;
 
+  // Semantic Scholar 
   if (fieldsToSearch.includes('title')) {
     const response = await searchByTitle(keywords, limit);
     papers = response;
@@ -29,6 +30,7 @@ app.get('/api/search/:fieldsToSearch/:keywords', async (req, res) => {
     }
   }
 
+  // DBLP
   const response = await axios.get(`https://dblp.org/search/publ/api?q=${keywords}&format=json`);
   const papersFromDblp = response.data.result.hits.hit?.map(hit => {
     return {
@@ -36,13 +38,28 @@ app.get('/api/search/:fieldsToSearch/:keywords', async (req, res) => {
       authors: hit.info.authors.author
     }
   });
-  papers.push(papersFromDblp);
-  console.log(papersFromDblp);
+  papers.push(...papersFromDblp);
 
-  /* TODO: for articles that are on semanticscholar link the URL to semanticscholar on article title instead of making a custom design
-  ?? Need to filter the articles if the same articles comes from 2 libraries ??
-  ?? Maybe it's also possible to do the same for DBLP articles. The user goes to dblp when cliking the article title 
-  ?? Semantic scholar can search by title or by author but on DBLP search is by both */
+  // ELSEVIER
+  const apiKey = '32f3a26cb29567a1d001c46f65e6c19b';
+  const count = 25;
+  const answer = await axios.get(`https://api.elsevier.com/content/search/scopus?apiKey=${apiKey}&count=${count}&query=${keywords}`);
+  const articlesFromElsevier = answer.data['search-results'].entry.map(article => {
+    return {
+      id: article['dc:identifier'],
+      title: article['dc:title'],
+      authors: { text: article['dc:creator']},
+      venue: article['prism:publicationName'],
+      url: article['prism:url']
+    }
+  });
+  papers.push(...articlesFromElsevier);
+
+  // Google Scholar
+  // const apiKeyGS = '8594cc15ad46993b1231ee63bc7a9bd19afd7cbefb5a467c392a098e3ace9f63';
+  // const responseFromGS = await axios.get(`https://serpapi.com/search.json?engine=google_scholar_profiles&mauthors=Mihaescu&api_key=`);
+
+  papers.forEach(paper => paper.type = 'ARTICLE');
   res.send(papers);
 });
 
@@ -68,7 +85,6 @@ async function searchByAuthor(keywords, limit) {
     response.data.data.forEach(author => {
       papers.push(...author.papers);
     });
-    // console.log(papers);
     return papers;
   }
 }
