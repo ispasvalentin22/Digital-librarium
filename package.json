@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ispasvalentin22/Digital-librarium#readme",
   "dependencies": {
+    "@devisle/reference-js": "^1.0.2",
     "@reduxjs/toolkit": "^1.9.3",
     "axios": "^1.2.3",
     "cors": "^2.8.5",

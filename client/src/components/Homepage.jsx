@@ -1,24 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import SearchBar from "./SearchBar";
 import CardList from "./CardList";
 import Progress from './Progress';
-import { useDispatch } from 'react-redux';
-import { articlesSave } from '../redux/article/article.actions';
 
 function Homepage() {
   const [state, setState] = useState({
     results: []
   });
   const [isLoading, setIsLoading] = useState(false);
-  const dispatch = useDispatch();
 
-  const onSearch = async (text, fieldsToSearch) => {
+  const onSearch = async (text, libraries) => {
     setIsLoading(true);
-    const results = await axios.get(`http://localhost:4000/api/search/${fieldsToSearch}/${text}`);
-    const articles = results.data;
-
-    dispatch(articlesSave({ articles }));
+    const results = await axios.post(`http://localhost:4000/api/search/${text}`, libraries);
 
     setIsLoading(false);
     setState(prevState => {

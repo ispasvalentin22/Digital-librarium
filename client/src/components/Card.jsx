@@ -1,41 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import { Link } from 'react-router-dom';
-import Article from './Article';
-import Popover from '@mui/material/Popover';
-import MouseOverPopover from './Popover';
-import Typography from '@mui/material/Typography';
 
 function Card(props) {
   const { article } = props;
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [myUrl, setMyUrl] = useState('https://example.com');
 
-  const handlePopoverOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
+  useEffect(() => {
+    setMyUrl(article.url);
+  }, [article.url]);
 
   return (
     <div className="resultCard">
-      <Link to={`articles/${article.paperId}`}>
-        {article.title}
-      </Link>
+      <h1><a href={myUrl}>{article.title}</a></h1>
       <section className="under-title">
-        {article.authors?.map((author, idx) => (
-          idx < 2 ? <h2 className="author">{author.name},</h2> : null
-        ))}
+        {Array.isArray(article.authors) ? article.authors?.map((author, idx) => (
+          idx < 2 ? <h2 className="author">{author.name || author.text},</h2> : null
+        )) : article.authors && <h2 className="author">{article.authors.text}</h2> }
         {article.authors?.length - 2 > 0 ? <h2>+{article.authors?.length - 2} authors</h2> : null}
         <h2 className="dot-authors">•</h2>
         {article.fieldsOfStudy?.map(field => (
           <h1 className="flex-item">{field}</h1>
         ))}
         <h1 className="flex-item">• {article.venue}</h1>
-        <h1 className="flex-item">• {article.publicationDate}</h1>
+        <h1 className="flex-item">• {article.publicationDate || article.year}</h1>
       </section>
       <section className="info">
         <span className="citations">
@@ -46,7 +33,6 @@ function Card(props) {
       </section>
     </div>
   )
-
 }
 
 export default Card;
