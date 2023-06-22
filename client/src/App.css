@@ -117,3 +117,9 @@
 .download {
   margin-bottom: 1rem;
 }
+
+.librariesTitle {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-decoration: underline;
+}

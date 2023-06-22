@@ -7,63 +7,82 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Welcome to Digital Librarium! More yet to come...');
-});
-
-app.get('/api/search/:fieldsToSearch/:keywords', async (req, res) => {
+app.post('/api/search/:keywords', async (req, res) => {
   const limit = 5;
-  let papers = [];
+  let papersFromSemanticScholar = [];
+  let papersFromDblp;
+  let papersFromElsevier;
+  let papersFromGoogleScholar;
 
-  const { fieldsToSearch, keywords } = req.params;
+  const { keywords } = req.params;
+  const libraries = req.body;
 
   // Semantic Scholar 
-  if (fieldsToSearch.includes('title')) {
-    const response = await searchByTitle(keywords, limit);
-    papers = response;
-  }
-
-  if (fieldsToSearch.includes('author')) {
-    const response = await searchByAuthor(keywords, limit);
+  if (libraries.semanticScholar) {
+    const response1 = await semanticScholarSearchByTitle(keywords, limit);
+    papersFromSemanticScholar.push(...response1);
+  
+    const response = await semanticScholarsearchByAuthor(keywords, limit);
     if (response && response.length) {
-      response.forEach(article => papers.push(article));
+      response.forEach(article => papersFromSemanticScholar.push(article));
     }
   }
 
   // DBLP
-  const response = await axios.get(`https://dblp.org/search/publ/api?q=${keywords}&format=json`);
-  const papersFromDblp = response.data.result.hits.hit?.map(hit => {
-    return {
-      ...hit.info,
-      authors: hit.info.authors.author
-    }
-  });
-  papers.push(...papersFromDblp);
+  if (libraries.dblp) {
+    const response = await axios.get(`https://dblp.org/search/publ/api?format=json&q=${keywords}`);
+    papersFromDblp = response.data.result.hits.hit?.map(hit => {
+      return {
+        ...hit.info,
+        type: 'ARTICLE',
+        authors: hit.info.authors.author
+      }
+    });
+  }
 
   // ELSEVIER
-  const apiKey = '32f3a26cb29567a1d001c46f65e6c19b';
-  const count = 25;
-  const answer = await axios.get(`https://api.elsevier.com/content/search/scopus?apiKey=${apiKey}&count=${count}&query=${keywords}`);
-  const articlesFromElsevier = answer.data['search-results'].entry.map(article => {
-    return {
-      id: article['dc:identifier'],
-      title: article['dc:title'],
-      authors: { text: article['dc:creator']},
-      venue: article['prism:publicationName'],
-      url: article['prism:url']
-    }
-  });
-  papers.push(...articlesFromElsevier);
+  if (libraries.elsevier) {
+    const apiKeyElsevier = '32f3a26cb29567a1d001c46f65e6c19b';
+    const count = 25;
+    const answer = await axios.get(`https://api.elsevier.com/content/search/scopus?apiKey=${apiKeyElsevier}&count=${count}&query=${keywords}`);
+    papersFromElsevier = answer?.data?.['search-results']?.entry.map(article => {
+      return {
+        type: 'ARTICLE',
+        id: article['dc:identifier'],
+        title: article['dc:title'],
+        authors: { text: article['dc:creator']},
+        venue: article['prism:publicationName'],
+        url: article['prism:url']
+      }
+    });
+  }
 
   // Google Scholar
-  // const apiKeyGS = '8594cc15ad46993b1231ee63bc7a9bd19afd7cbefb5a467c392a098e3ace9f63';
-  // const responseFromGS = await axios.get(`https://serpapi.com/search.json?engine=google_scholar_profiles&mauthors=Mihaescu&api_key=`);
+  if (libraries.googleScholar) {
+    const apiKeyGS = '8594cc15ad46993b1231ee63bc7a9bd19afd7cbefb5a467c392a098e3ace9f63';
+    const responseFromGS = await axios.get(`https://serpapi.com/search?engine=google_scholar&api_key=${apiKeyGS}&q=${keywords}`);
+    papersFromGoogleScholar = responseFromGS.data?.organic_results?.map(article => {
+      return {
+        type: 'ARTICLE',
+        id: article.result_id,
+        title: article.title,
+        authors: article.publication_info.authors,
+        url: article?.resources?.find(resource => resource.file_format === 'PDF')?.link
+      }
+    });
+  }
 
-  papers.forEach(paper => paper.type = 'ARTICLE');
+  const papers = {
+    papersFromSemanticScholar,
+    papersFromDblp,
+    papersFromElsevier,
+    papersFromGoogleScholar
+  }
+
   res.send(papers);
 });
 
-async function searchByTitle(keywords, limit) {
+async function semanticScholarSearchByTitle(keywords, limit) {
   const fieldsToReturn = `title,abstract,publicationDate,referenceCount,citationCount,influentialCitationCount,openAccessPdf,authors,venue,fieldsOfStudy,citations,references`;
   const response = await axios.get(
     `https://api.semanticscholar.org/graph/v1/paper/search?query=${keywords}&limit=${limit}&fields=${fieldsToReturn}`
@@ -74,7 +93,7 @@ async function searchByTitle(keywords, limit) {
   }
 }
 
-async function searchByAuthor(keywords, limit) {
+async function semanticScholarsearchByAuthor(keywords, limit) {
   const fieldsToReturn = `name,aliases,paperCount,citationCount,papers.externalIds,papers.url,papers.title,papers.abstract,papers.venue,papers.year,papers.publicationVenue,papers.referenceCount,papers.citationCount,papers.isOpenAccess,papers.influentialCitationCount,papers.openAccessPdf,papers.fieldsOfStudy,papers.publicationDate,papers.authors`;
   const response = await axios.get(
     `https://api.semanticscholar.org/graph/v1/author/search?query=${keywords}&limit=${limit}&fields=${fieldsToReturn}`

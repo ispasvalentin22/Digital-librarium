@@ -15,7 +15,7 @@ function Card(props) {
       <section className="under-title">
         {Array.isArray(article.authors) ? article.authors?.map((author, idx) => (
           idx < 2 ? <h2 className="author">{author.name || author.text},</h2> : null
-        )) : <h2 className="author">{article.authors.text}</h2> }
+        )) : article.authors && <h2 className="author">{article.authors.text}</h2> }
         {article.authors?.length - 2 > 0 ? <h2>+{article.authors?.length - 2} authors</h2> : null}
         <h2 className="dot-authors">•</h2>
         {article.fieldsOfStudy?.map(field => (
